@@ -7,9 +7,13 @@
 #define MAX_ITERATIONS 1024
 #define ESCAPE_RADIUS  4.02
 
+
 const char* letters = " .`-_':,;^=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q";
 
+
 unsigned int mandelbrot_set(double x0, double y0);
+void init_color_pairs();
+void print_char(int x, int y, unsigned long char_param, int color_pair);
 
 
 int main(void)
@@ -24,6 +28,8 @@ int main(void)
 	initscr();
 	noecho();
 	keypad(stdscr, true);
+	start_color();
+	init_color_pairs();
 
 	do {
 		for (int y = 0; y < LINES; ++y) {
@@ -33,7 +39,8 @@ int main(void)
 				x0 = ((x - (COLS / 2)) / zoom) / 2 + cam_x;
 				iterations = mandelbrot_set(x0, y0);
 
-				mvaddch(y, x, (unsigned long)letters[iterations % letters_length] | A_BOLD);
+				print_char(x, y, (unsigned long)letters[iterations % letters_length] | A_BOLD,
+					(int)(((iterations * 128) / MAX_ITERATIONS) % 7 + 1));
 			}
 		}
 
@@ -80,4 +87,24 @@ unsigned int mandelbrot_set(double x0, double y0)
 	}
 
 	return 0;
+}
+
+
+void init_color_pairs()
+{
+	init_pair(1, COLOR_WHITE,   COLOR_BLACK);
+	init_pair(2, COLOR_BLUE,    COLOR_BLACK);
+	init_pair(3, COLOR_CYAN,    COLOR_BLACK);
+	init_pair(4, COLOR_GREEN,   COLOR_BLACK);
+	init_pair(5, COLOR_YELLOW,  COLOR_BLACK);
+	init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(7, COLOR_RED,     COLOR_BLACK);
+}
+
+
+void print_char(int x, int y, unsigned long char_param, int color_pair)
+{
+	attron(COLOR_PAIR(color_pair));
+	mvaddch(y, x, char_param);
+	attroff(COLOR_PAIR(color_pair));
 }
