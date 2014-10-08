@@ -38,6 +38,27 @@ void* render_image(void* fractal_params)
 }
 
 
+void* check_input(void* fractal_params)
+{
+	unsigned int pressed_key;
+
+	do {
+		pressed_key = getch();
+
+		switch(pressed_key) {
+			case 'w': ((fractal_params_t*)fractal_params)->zoom *= 1.2; break;
+			case 's': ((fractal_params_t*)fractal_params)->zoom /= 1.2; break;
+			case KEY_UP:    ((fractal_params_t*)fractal_params)->cam_y += 1 / ((fractal_params_t*)fractal_params)->zoom; break;
+			case KEY_DOWN:  ((fractal_params_t*)fractal_params)->cam_y -= 1 / ((fractal_params_t*)fractal_params)->zoom; break;
+			case KEY_LEFT:  ((fractal_params_t*)fractal_params)->cam_x -= 1 / ((fractal_params_t*)fractal_params)->zoom; break;
+			case KEY_RIGHT: ((fractal_params_t*)fractal_params)->cam_x += 1 / ((fractal_params_t*)fractal_params)->zoom; break;
+		}
+	} while (pressed_key != 'q');
+
+	return NULL;
+}
+
+
 unsigned int mandelbrot_set(double x0, double y0)
 {
 	double x, y, x2, y2, new_x, new_y;
