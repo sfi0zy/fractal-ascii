@@ -31,6 +31,7 @@ void* render_image(void* fractal_params)
 			}
 		}
 
+		print_info(cam_x, cam_y, zoom);
 		refresh();
 	}
 
@@ -88,12 +89,12 @@ unsigned int mandelbrot_set(double x0, double y0)
 void init_color_pairs()
 {
 	init_pair(1, COLOR_WHITE,   COLOR_BLACK);
-	init_pair(2, COLOR_BLUE,    COLOR_BLACK);
-	init_pair(3, COLOR_CYAN,    COLOR_BLACK);
-	init_pair(4, COLOR_GREEN,   COLOR_BLACK);
+	init_pair(2, COLOR_GREEN,   COLOR_BLACK);
+	init_pair(3, COLOR_WHITE,   COLOR_BLACK);
+	init_pair(4, COLOR_RED,     COLOR_BLACK);
 	init_pair(5, COLOR_YELLOW,  COLOR_BLACK);
-	init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-	init_pair(7, COLOR_RED,     COLOR_BLACK);
+	init_pair(6, COLOR_WHITE,   COLOR_BLACK);
+	init_pair(7, COLOR_WHITE,   COLOR_BLACK);
 }
 
 
@@ -104,4 +105,34 @@ void print_char(int x, int y, unsigned long char_param, int color_pair)
 	}
 	
 	mvaddch(y, x, char_param);
+}
+
+
+void print_info(double cam_x, double cam_y, double zoom)
+{
+	char cam_x_str[32];
+	char cam_y_str[32];
+	char zoom_str[32];
+
+	sprintf(cam_x_str, "Cam.Ox: %f", cam_x);
+	sprintf(cam_y_str, "Cam.Oy: %f", cam_y);
+	sprintf(zoom_str, "Zoom: %0.1f", zoom);
+
+	if (has_colors()) {
+		attron(COLOR_PAIR(1));
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 32; ++j) {
+			if (i == 5 || j >= 30) {
+				mvaddch(i, j, ':');
+			} else {
+				mvaddch(i, j, ' ');
+			}
+		}
+	}
+
+	mvaddstr(1, 1, cam_x_str);
+	mvaddstr(2, 1, cam_y_str);
+	mvaddstr(3, 1, zoom_str);
 }

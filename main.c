@@ -21,6 +21,5 @@ int main(void)
 	pthread_join(input_thread_id, NULL);
 
 	endwin();
-	clear();
 	exit(0);
 }

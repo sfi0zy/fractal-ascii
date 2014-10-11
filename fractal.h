@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <ncurses.h>
 #include <pthread.h>
@@ -30,3 +31,4 @@ void* check_input(void*);
 unsigned int mandelbrot_set(double, double);
 void init_color_pairs();
 void print_char(int, int, unsigned long, int);
+void print_info(double, double, double);
