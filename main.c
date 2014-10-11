@@ -9,9 +9,9 @@ int main(void)
 
 	void* input_thread_ret_status;
 
-	params.cam_x = DEFAULT_CAM_X;
-	params.cam_y = DEFAULT_CAM_Y;
-	params.zoom  = DEFAULT_ZOOM;
+	params.cam_x = CAM_X_DEFAULT;
+	params.cam_y = CAM_Y_DEFAULT;
+	params.zoom  = ZOOM_DEFAULT;
 
 	initscr();
 
@@ -19,6 +19,7 @@ int main(void)
 	pthread_create(&input_thread_id, NULL, &check_input, &params);
 
 	pthread_join(input_thread_id, &input_thread_ret_status);
+	pthread_cancel(render_thread_id);
 
 	endwin();
 	exit(0);

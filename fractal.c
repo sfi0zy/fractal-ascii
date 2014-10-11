@@ -77,35 +77,35 @@ void* check_input(void* fractal_params)
 
 		switch(pressed_key) {
 			case 'w': {
-				((fractal_params_t*)fractal_params)->zoom *= 1.2;
+				((fractal_params_t*)fractal_params)->zoom *= ZOOM_STEP;
 				break;
 			}
 			case 's': {
-				if (((fractal_params_t*)fractal_params)->zoom > 1.2) {
-					((fractal_params_t*)fractal_params)->zoom /= 1.2;
+				if (((fractal_params_t*)fractal_params)->zoom > ZOOM_STEP * ZOOM_DEFAULT) {
+					((fractal_params_t*)fractal_params)->zoom /= ZOOM_STEP;
 				}
 				break;
 			}
 			case KEY_UP:    {
-				if (((fractal_params_t*)fractal_params)->cam_y < 3) {
+				if (((fractal_params_t*)fractal_params)->cam_y < CAM_Y_MAX) {
 					((fractal_params_t*)fractal_params)->cam_y += 1 / ((fractal_params_t*)fractal_params)->zoom;
 				}
 				break;
 			}
 			case KEY_DOWN:  {
-				if (((fractal_params_t*)fractal_params)->cam_y > -3) {
+				if (((fractal_params_t*)fractal_params)->cam_y > CAM_Y_MIN) {
 					((fractal_params_t*)fractal_params)->cam_y -= 1 / ((fractal_params_t*)fractal_params)->zoom;
 				}
 				break;
 			}
 			case KEY_LEFT:  {
-				if (((fractal_params_t*)fractal_params)->cam_x > -3) {
+				if (((fractal_params_t*)fractal_params)->cam_x > CAM_X_MIN) {
 					((fractal_params_t*)fractal_params)->cam_x -= 1 / ((fractal_params_t*)fractal_params)->zoom;
 				}
 				break;
 			}
 			case KEY_RIGHT: {
-				if (((fractal_params_t*)fractal_params)->cam_x < 3) {
+				if (((fractal_params_t*)fractal_params)->cam_x < CAM_X_MAX) {
 					((fractal_params_t*)fractal_params)->cam_x += 1 / ((fractal_params_t*)fractal_params)->zoom;
 				}
 				break;
@@ -164,14 +164,6 @@ void init_color_pairs()
 
 void print_info(double cam_x, double cam_y, double zoom)
 {
-	char cam_x_str[32];
-	char cam_y_str[32];
-	char zoom_str[32];
-
-	sprintf(cam_x_str, "Cam.Ox: %f", cam_x);
-	sprintf(cam_y_str, "Cam.Oy: %f", cam_y);
-	sprintf(zoom_str, "Zoom: %0.1f", zoom);
-
 	if (has_colors()) {
 		attron(COLOR_PAIR(1));
 	}
@@ -186,7 +178,10 @@ void print_info(double cam_x, double cam_y, double zoom)
 		}
 	}
 
-	mvaddstr(1, 1, cam_x_str);
-	mvaddstr(2, 1, cam_y_str);
-	mvaddstr(3, 1, zoom_str);
+	move(1, 1);
+	printw("Cam.Ox: %f", cam_x);
+	move(2, 1);
+	printw("Cam.Oy: %f", cam_y);
+	move(3, 1);
+	printw("Zoom: %0.1f", zoom);
 }
