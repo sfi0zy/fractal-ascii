@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -std=c99
+CFLAGS=-c --std=c99
 LFLAGS=-lncurses -lpthread
 SOURCES=main.c fractal.c
 OBJECTS=$(SOURCES:.c=.o)
