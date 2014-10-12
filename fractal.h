@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <ncurses.h>
@@ -20,6 +19,7 @@
 #define ZOOM_DEFAULT   10
 #define ZOOM_STEP      1.2
 #define ZOOM_MIN       1
+#define HAS_COLOR_DEFAULT false
 
 #define GAMMA_ASCII " .`-_':,;^=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q"
 #define NUMBER_OF_COLORS 7
@@ -33,6 +33,7 @@ typedef struct {
 	double cam_y;
 	double zoom;
 	unsigned int iterations;
+	bool has_color;
 } fractal_params_t;
 
 
@@ -42,4 +43,4 @@ void* check_input(void*);
 unsigned int mandelbrot_set(double, double);
 
 void init_color_pairs();
-void print_info(double, double, double);
+void print_info(double, double, double, bool);

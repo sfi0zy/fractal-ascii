@@ -15,6 +15,7 @@ int main(void)
 	params.cam_x = CAM_X_DEFAULT;
 	params.cam_y = CAM_Y_DEFAULT;
 	params.zoom  = ZOOM_DEFAULT;
+	params.has_color = HAS_COLOR_DEFAULT;
 
 	initscr();
 

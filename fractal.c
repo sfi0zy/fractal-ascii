@@ -13,11 +13,10 @@ void* render_image(void* fractal_params)
 	
 	const unsigned int gamma_length = strlen(GAMMA_ASCII);
 
-	has_color = has_colors();
 	last_color_pair = 1;
 	last_cam_x = last_cam_y = last_zoom = 1.0;
 
-	if (has_color) {
+	if (has_colors()) {
 		start_color();
 		init_color_pairs();
 	}
@@ -32,6 +31,7 @@ void* render_image(void* fractal_params)
 		cam_x = ((fractal_params_t*)fractal_params)->cam_x;
 		cam_y = ((fractal_params_t*)fractal_params)->cam_y;
 		zoom  = ((fractal_params_t*)fractal_params)->zoom;
+		has_color = ((fractal_params_t*)fractal_params)->has_color;
 
 		if (fabs(last_cam_x - cam_x) < DOUBLE_COMPARSION_DELTA &&
 			fabs(last_cam_y - cam_y) < DOUBLE_COMPARSION_DELTA &&
@@ -63,7 +63,7 @@ void* render_image(void* fractal_params)
 			}
 		}
 
-		print_info(cam_x, cam_y, zoom);
+		print_info(cam_x, cam_y, zoom, has_color);
 		move(LINES-1, COLS-1); /* Move blinking cursor to rigth-bottom */
 		refresh();
 
@@ -100,6 +100,12 @@ void* check_input(void* fractal_params)
 			case 's': {
 				if (((fractal_params_t*)fractal_params)->zoom > ZOOM_STEP * ZOOM_DEFAULT) {
 					((fractal_params_t*)fractal_params)->zoom /= ZOOM_STEP;
+				}
+				break;
+			}
+			case 'c': {
+				if (has_colors()) {
+					((fractal_params_t*)fractal_params)->has_color = !((fractal_params_t*)fractal_params)->has_color;
 				}
 				break;
 			}
@@ -181,9 +187,9 @@ void init_color_pairs()
 }
 
 
-void print_info(double cam_x, double cam_y, double zoom)
+void print_info(double cam_x, double cam_y, double zoom, bool has_color)
 {
-	if (has_colors()) {
+	if (has_color) {
 		attron(COLOR_PAIR(1));
 	}
 
