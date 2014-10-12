@@ -1,6 +1,9 @@
 #include "fractal.h"
 
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+
 int main(void)
 {
 	pthread_t render_thread_id;

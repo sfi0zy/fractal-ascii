@@ -1,17 +1,23 @@
 #include "fractal.h"
 
 
+extern pthread_mutex_t mutex;
+
+
 void* render_image(void* fractal_params)
 {
+	bool has_color;
 	int x, y;
 	double x0, y0, cam_x, cam_y, zoom, last_cam_x, last_cam_y, last_zoom;
-	unsigned int iterations;
-
+	unsigned int iterations, color_pair, last_color_pair;
+	
 	const unsigned int gamma_length = strlen(GAMMA_ASCII);
 
+	has_color = has_colors();
+	last_color_pair = 1;
 	last_cam_x = last_cam_y = last_zoom = 1.0;
 
-	if (has_colors()) {
+	if (has_color) {
 		start_color();
 		init_color_pairs();
 	}
@@ -33,6 +39,8 @@ void* render_image(void* fractal_params)
 			goto __render_image_next_iter;
 		}
 
+		pthread_mutex_lock(&mutex);
+
 		erase();
 
 		for (y = 0; y < LINES; ++y) {
@@ -40,12 +48,17 @@ void* render_image(void* fractal_params)
 
 			for (x = 0; x < COLS; ++x) {
 				x0 = ((x - (COLS / 2)) / zoom) / 2 + cam_x;
-				iterations = mandelbrot_set(x0, y0);
+				iterations = mandelbrot_set(x0, y0);		
 
-				if (has_colors()) {
-					attron(COLOR_PAIR(((iterations * 128) / MAX_ITERATIONS) % NUMBER_OF_COLORS + 1));
+				if (has_color) {
+					color_pair = ((iterations * 128) / MAX_ITERATIONS) % NUMBER_OF_COLORS + 1;
+
+					if (color_pair != last_color_pair) {
+						attron(COLOR_PAIR(color_pair));
+						last_color_pair = color_pair;
+					}
 				}
-
+				
 				mvaddch(y, x, (unsigned long)GAMMA_ASCII[iterations % gamma_length]);
 			}
 		}
@@ -53,6 +66,8 @@ void* render_image(void* fractal_params)
 		print_info(cam_x, cam_y, zoom);
 		move(LINES-1, COLS-1); /* Move blinking cursor to rigth-bottom */
 		refresh();
+
+		pthread_mutex_unlock(&mutex);
 
 		__render_image_next_iter:
 
@@ -74,6 +89,8 @@ void* check_input(void* fractal_params)
 
 	do {
 		pressed_key = getch();
+
+		pthread_mutex_lock(&mutex);
 
 		switch(pressed_key) {
 			case 'w': {
@@ -118,6 +135,8 @@ void* check_input(void* fractal_params)
 				break;
 			}
 		}
+
+		pthread_mutex_unlock(&mutex);
 	} while (pressed_key != 'q');
 
 	return NULL;
