@@ -1,3 +1,6 @@
+#ifndef FRACTAL_H_INCLUDED
+#define FRACTAL_H_INCLUDED
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -19,6 +22,7 @@
 #define ZOOM_DEFAULT   10
 #define ZOOM_STEP      1.2
 #define ZOOM_MIN       1
+#define ZOOM_MAX       10000000
 #define HAS_COLOR_DEFAULT false
 
 #define GAMMA_ASCII " .`-_':,;^=+/\"|)\\<>)iv%xclrs{*}I?!][1taeo7zjLunT#JCwfy325Fp6mqSghVd4EgXPGZbYkOA&8U$@KHDBWNMR0Q"
@@ -44,3 +48,5 @@ unsigned int mandelbrot_set(double, double);
 
 void init_color_pairs();
 void print_info(double, double, double, bool);
+
+#endif /* FRACTAL_H_INCLUDED */

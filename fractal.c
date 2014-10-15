@@ -94,7 +94,9 @@ void* check_input(void* fractal_params)
 
 		switch(pressed_key) {
 			case 'w': {
-				((fractal_params_t*)fractal_params)->zoom *= ZOOM_STEP;
+				if (((fractal_params_t*)fractal_params)->zoom < ZOOM_MAX) {
+					((fractal_params_t*)fractal_params)->zoom *= ZOOM_STEP;
+				}
 				break;
 			}
 			case 's': {
@@ -208,5 +210,9 @@ void print_info(double cam_x, double cam_y, double zoom, bool has_color)
 	move(2, 1);
 	printw("Cam.Oy: %f", cam_y);
 	move(3, 1);
-	printw("Zoom: %0.1f", zoom);
+	if (zoom >= ZOOM_MAX) {
+		printw("Zoom: %0.1f (MAX)", zoom);
+	} else {
+		printw("Zoom: %0.1f", zoom);
+	}
 }
