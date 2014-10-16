@@ -37,19 +37,21 @@ int main(int argc, char** argv)
 		exit(EINVAL);
 	}
 
-	void* input_thread_ret_status;
-
+	params.const_real = CONST_REAL_DEFAULT;
+	params.const_imag = CONST_IMAG_DEFAULT;
+	params.function = FRACTAL_FUNCTION_DEFAULT;
 	params.cam_x = CAM_X_DEFAULT;
 	params.cam_y = CAM_Y_DEFAULT;
 	params.zoom  = ZOOM_DEFAULT;
 	params.has_color = HAS_COLOR_DEFAULT;
+	params.params_updated = true;
 
 	initscr();
 
 	pthread_create(&render_thread_id, NULL, &render_image, &params);
 	pthread_create(&input_thread_id, NULL, &check_input, &params);
 
-	pthread_join(input_thread_id, &input_thread_ret_status);
+	pthread_join(input_thread_id, NULL);
 	pthread_cancel(render_thread_id);
 
 	endwin();

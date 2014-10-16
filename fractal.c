@@ -8,13 +8,13 @@ void* render_image(void* fractal_params)
 {
 	bool has_color;
 	int x, y;
-	double x0, y0, cam_x, cam_y, zoom, last_cam_x, last_cam_y, last_zoom;
+	double x0, y0, cam_x, cam_y, zoom, const_real, const_imag;
 	unsigned int iterations, color_pair, last_color_pair;
+	unsigned int (*function)(double, double, double, double);
 	
 	const unsigned int gamma_length = strlen(GAMMA_ASCII);
 
 	last_color_pair = 1;
-	last_cam_x = last_cam_y = last_zoom = 1.0;
 
 	if (has_colors()) {
 		start_color();
@@ -32,11 +32,12 @@ void* render_image(void* fractal_params)
 		cam_y = ((fractal_params_t*)fractal_params)->cam_y;
 		zoom  = ((fractal_params_t*)fractal_params)->zoom;
 		has_color = ((fractal_params_t*)fractal_params)->has_color;
+		function = ((fractal_params_t*)fractal_params)->function;
+		const_real = ((fractal_params_t*)fractal_params)->const_real;
+		const_imag = ((fractal_params_t*)fractal_params)->const_imag;
 
-		if (fabs(last_cam_x - cam_x) < DOUBLE_COMPARSION_DELTA &&
-			fabs(last_cam_y - cam_y) < DOUBLE_COMPARSION_DELTA &&
-			fabs(last_zoom - zoom) < DOUBLE_COMPARSION_DELTA) {
-			goto __render_image_next_iter;
+		if (!((fractal_params_t*)fractal_params)->params_updated) {
+			continue;
 		}
 
 		pthread_mutex_lock(&mutex);
@@ -48,7 +49,7 @@ void* render_image(void* fractal_params)
 
 			for (x = 0; x < COLS; ++x) {
 				x0 = ((x - (COLS / 2)) / zoom) / 2 + cam_x;
-				iterations = mandelbrot_set(x0, y0);		
+				iterations = function(x0, y0, const_real, const_imag);		
 
 				if (has_color) {
 					color_pair = ((iterations * 128) / MAX_ITERATIONS) % NUMBER_OF_COLORS + 1;
@@ -63,17 +64,11 @@ void* render_image(void* fractal_params)
 			}
 		}
 
-		print_info(cam_x, cam_y, zoom, has_color);
+		print_info(cam_x, cam_y, zoom, has_color, const_real, const_imag);
 		move(LINES-1, COLS-1); /* Move blinking cursor to rigth-bottom */
 		refresh();
 
 		pthread_mutex_unlock(&mutex);
-
-		__render_image_next_iter:
-
-		last_cam_x = cam_x;
-		last_cam_y = cam_y;
-		last_zoom = zoom;
 	}
 
 	return NULL;
@@ -96,43 +91,90 @@ void* check_input(void* fractal_params)
 			case 'w': {
 				if (((fractal_params_t*)fractal_params)->zoom < ZOOM_MAX) {
 					((fractal_params_t*)fractal_params)->zoom *= ZOOM_STEP;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case 's': {
 				if (((fractal_params_t*)fractal_params)->zoom > ZOOM_STEP * ZOOM_DEFAULT) {
 					((fractal_params_t*)fractal_params)->zoom /= ZOOM_STEP;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case 'c': {
 				if (has_colors()) {
 					((fractal_params_t*)fractal_params)->has_color = !((fractal_params_t*)fractal_params)->has_color;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case KEY_UP:    {
 				if (((fractal_params_t*)fractal_params)->cam_y < CAM_Y_MAX) {
 					((fractal_params_t*)fractal_params)->cam_y += 1 / ((fractal_params_t*)fractal_params)->zoom;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case KEY_DOWN:  {
 				if (((fractal_params_t*)fractal_params)->cam_y > CAM_Y_MIN) {
 					((fractal_params_t*)fractal_params)->cam_y -= 1 / ((fractal_params_t*)fractal_params)->zoom;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case KEY_LEFT:  {
 				if (((fractal_params_t*)fractal_params)->cam_x > CAM_X_MIN) {
 					((fractal_params_t*)fractal_params)->cam_x -= 1 / ((fractal_params_t*)fractal_params)->zoom;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
 				break;
 			}
 			case KEY_RIGHT: {
 				if (((fractal_params_t*)fractal_params)->cam_x < CAM_X_MAX) {
 					((fractal_params_t*)fractal_params)->cam_x += 1 / ((fractal_params_t*)fractal_params)->zoom;
+					((fractal_params_t*)fractal_params)->params_updated = true;
 				}
+				break;
+			}
+			case '1': {
+				((fractal_params_t*)fractal_params)->const_real += CONST_STEP;
+				((fractal_params_t*)fractal_params)->params_updated = true;
+				break;
+			}
+			case '2': {
+				((fractal_params_t*)fractal_params)->const_real -= CONST_STEP;
+				((fractal_params_t*)fractal_params)->params_updated = true;
+				break;
+			}
+			case '3': {
+				((fractal_params_t*)fractal_params)->const_imag += CONST_STEP;
+				((fractal_params_t*)fractal_params)->params_updated = true;
+				break;
+			}
+			case '4': {
+				((fractal_params_t*)fractal_params)->const_imag -= CONST_STEP;
+				((fractal_params_t*)fractal_params)->params_updated = true;
+				break;
+			}
+			case 'j': {
+				((fractal_params_t*)fractal_params)->function = julia_set;
+				((fractal_params_t*)fractal_params)->zoom = ZOOM_DEFAULT;
+				((fractal_params_t*)fractal_params)->const_real = CONST_REAL_DEFAULT;
+				((fractal_params_t*)fractal_params)->const_imag = CONST_IMAG_DEFAULT;
+				((fractal_params_t*)fractal_params)->cam_x = CAM_X_DEFAULT;
+				((fractal_params_t*)fractal_params)->cam_y = CAM_Y_DEFAULT;
+				((fractal_params_t*)fractal_params)->params_updated = true;
+				break;
+			}
+			case 'm': {
+				((fractal_params_t*)fractal_params)->function = mandelbrot_set;
+				((fractal_params_t*)fractal_params)->zoom = ZOOM_DEFAULT;
+				((fractal_params_t*)fractal_params)->const_real = CONST_REAL_DEFAULT;
+				((fractal_params_t*)fractal_params)->const_imag = CONST_IMAG_DEFAULT;
+				((fractal_params_t*)fractal_params)->cam_x = CAM_X_DEFAULT;
+				((fractal_params_t*)fractal_params)->cam_y = CAM_Y_DEFAULT;
+				((fractal_params_t*)fractal_params)->params_updated = true;
 				break;
 			}
 			case ERR: {
@@ -151,7 +193,7 @@ void* check_input(void* fractal_params)
 }
 
 
-unsigned int mandelbrot_set(double x0, double y0)
+unsigned int mandelbrot_set(double x0, double y0, double const_real, double const_imag)
 {
 	double x, y, x2, y2, new_x, new_y;
 
@@ -177,6 +219,32 @@ unsigned int mandelbrot_set(double x0, double y0)
 }
 
 
+unsigned int julia_set(double x0, double y0, double const_real, double const_imag)
+{
+	double x, y, x2, y2, new_x, new_y;
+
+	x = x0;
+	y = y0;
+
+	for (unsigned int i = 0; i < MAX_ITERATIONS; ++i) {
+		x2 = x * x;
+		y2 = y * y;
+
+		if (ESCAPE_RADIUS < x2 + y2) {
+			return i;
+		}
+
+		new_x = x2 - y2 + const_real;
+		new_y = 2.0 * x * y + const_imag;
+
+		x = new_x;
+		y = new_y;
+	}
+
+	return 0;
+}
+
+
 void init_color_pairs()
 {
 	init_pair(1, COLOR_WHITE,   COLOR_BLACK);
@@ -189,15 +257,15 @@ void init_color_pairs()
 }
 
 
-void print_info(double cam_x, double cam_y, double zoom, bool has_color)
+void print_info(double cam_x, double cam_y, double zoom, bool has_color, double const_real, double const_imag)
 {
 	if (has_color) {
 		attron(COLOR_PAIR(1));
 	}
 
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < 8; ++i) {
 		for (int j = 0; j < 32; ++j) {
-			if (i == 5 || j >= 30) {
+			if (i == 7 || j >= 30) {
 				mvaddch(i, j, ':');
 			} else {
 				mvaddch(i, j, ' ');
@@ -215,4 +283,8 @@ void print_info(double cam_x, double cam_y, double zoom, bool has_color)
 	} else {
 		printw("Zoom: %0.1f", zoom);
 	}
+	move(4, 1);
+	printw("Const R: %f", const_real);
+	move(5, 1);
+	printw("Const I: %f", const_imag);
 }
