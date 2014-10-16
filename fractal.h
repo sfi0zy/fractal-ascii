@@ -8,6 +8,7 @@
 #include <ncurses.h>
 #include <pthread.h>
 #include <math.h>
+#include <getopt.h>
 
 
 #define MAX_ITERATIONS 1024
@@ -30,6 +31,14 @@
 
 
 #define DOUBLE_COMPARSION_DELTA 0.00000001
+
+
+#define HELP_STRING "-------------------------------------------------\n\
+Fractal generator with ASCII graphics for Linux\n\
+-------------------------------------------------\n\
+Use 'W' and 'S' for zoom\n\
+Use arrow keys for moving picture\n\
+Use 'C' to color on/off\n"
 
 
 typedef struct {

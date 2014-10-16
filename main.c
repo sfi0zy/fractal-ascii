@@ -4,11 +4,38 @@
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
-int main(void)
+int main(int argc, char** argv)
 {
 	pthread_t render_thread_id;
 	pthread_t input_thread_id;
 	fractal_params_t params;
+	int next_option, err_flag;
+
+	err_flag = 0;
+
+	while((next_option = getopt(argc, argv, ":h")) != -1) {
+		switch (next_option) {
+			case 'h':
+				printf(HELP_STRING);
+				exit(EXIT_SUCCESS);
+			case '?':
+				fprintf(stderr, "Unrecognised option: -%c\n", optopt);
+				err_flag++;
+				break;
+			default:
+				break;
+		}
+	}
+
+	while (optind < argc) {
+		fprintf(stderr, "invalid argument %s\n", optarg);
+		optind++;
+		err_flag++;
+	}
+
+	if (err_flag) {
+		exit(EINVAL);
+	}
 
 	void* input_thread_ret_status;
 
@@ -26,5 +53,5 @@ int main(void)
 	pthread_cancel(render_thread_id);
 
 	endwin();
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
