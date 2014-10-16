@@ -40,6 +40,8 @@ void* render_image(void* fractal_params)
 			continue;
 		}
 
+		((fractal_params_t*)fractal_params)->params_updated = false;
+
 		pthread_mutex_lock(&mutex);
 
 		erase();
